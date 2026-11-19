@@ -1,0 +1,29 @@
+[
+  {
+    "id": "aww emilie!",
+    "title": "Aww Emilie!",
+    "image": "/artworks/aww emilie!/corpse.jpg",
+    "asciiUrl": "/artworks/aww emilie!/ascii.html",
+    "type": "ARTWORK",
+    "tone": "aqua",
+    "note": ""
+  },
+  {
+    "id": "even ravi can't",
+    "title": "Even Ravi Can'T",
+    "image": "/artworks/even ravi can't/image (1).jpg",
+    "asciiUrl": "/artworks/even ravi can't/ascii.html",
+    "type": "ARTWORK",
+    "tone": "aqua",
+    "note": ""
+  },
+  {
+    "id": "godess_fs",
+    "title": "Godess Fs",
+    "image": "/artworks/godess_fs/hano.jpg",
+    "asciiUrl": "/artworks/godess_fs/ascii.html",
+    "type": "ARTWORK",
+    "tone": "aqua",
+    "note": ""
+  }
+]
