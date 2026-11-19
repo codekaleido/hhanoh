@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   Download,
@@ -445,101 +445,239 @@ function Gallery() {
 
 /* ---------------- DINO GAME ---------------- */
 
+// ---- Dino game constants ----
+const DG_WIDTH = 600;
+const DG_X = 40;       // dino left position
+const DG_W = 28;       // dino width
+const DG_OBS_W = 18;   // obstacle width
+const DG_OBS_H = 28;   // obstacle height
+const DG_GRAVITY = 2600;
+const DG_JUMP_V = 760;
+const DG_START_SPEED = 280;
+const DG_MAX_SPEED = 620;
+
+const dgInitial = () => ({ y: 0, vy: 0, obsX: DG_WIDTH, speed: DG_START_SPEED, distance: 0 });
+const dgPad = (n) => String(n).padStart(5, '0');
+
+const DG_CSS = `
+.dg { font-family: 'Courier New', monospace; width: 600px; max-width: 100%;
+  user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.dg-score { text-align: right; letter-spacing: 2px; font-weight: bold; margin-bottom: 6px; }
+.dg-stage { position: relative; height: 150px; overflow: hidden;
+  border-bottom: 2px solid currentColor; cursor: pointer; }
+.dg-sprite { position: absolute; bottom: 0; display: flex; align-items: center;
+  justify-content: center; height: 28px; font-size: 26px; line-height: 1; will-change: transform; }
+.dg-dino { left: 40px; width: 28px; }
+.dg-obs { left: 0; width: 18px; }
+.dg-overlay { position: absolute; inset: 0; display: flex; align-items: center;
+  justify-content: center; font-weight: bold; letter-spacing: 2px; pointer-events: none; }
+.dg-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  margin-top: 10px; font-size: 12px; }
+.dg-controls span { margin-right: auto; }
+.dg-controls button { font: inherit; padding: 4px 10px; border: 1px solid currentColor;
+  background: transparent; color: inherit; cursor: pointer; }
+`;
+
 function Dino() {
-  const [on, setOn] = useState(false);
-  const [jump, setJump] = useState(false);
+  const [status, setStatus] = useState('idle'); // idle | running | paused | over
   const [score, setScore] = useState(0);
+  const [best, setBest] = useState(0);
 
+  const statusRef = useRef('idle');
+  const game = useRef(dgInitial());
+  const dinoEl = useRef(null);
+  const obsEl = useRef(null);
+
+  const changeStatus = useCallback((s) => {
+    statusRef.current = s;
+    setStatus(s);
+  }, []);
+
+  const paint = useCallback(() => {
+    const g = game.current;
+    if (dinoEl.current) dinoEl.current.style.transform = `translateY(${-g.y}px)`;
+    if (obsEl.current) obsEl.current.style.transform = `translateX(${g.obsX}px)`;
+  }, []);
+
+  const resetGame = useCallback(() => {
+    game.current = dgInitial();
+    paint();
+    setScore(0);
+  }, [paint]);
+
+  const toggle = useCallback(() => {
+    const s = statusRef.current;
+    if (s === 'running') {
+      changeStatus('paused');
+    } else {
+      if (s === 'over') resetGame();
+      changeStatus('running');
+    }
+  }, [changeStatus, resetGame]);
+
+  const reset = useCallback(() => {
+    changeStatus('idle');
+    resetGame();
+  }, [changeStatus, resetGame]);
+
+  const jump = useCallback(() => {
+    if (statusRef.current !== 'running') {
+      toggle();
+    } else if (game.current.y === 0) {
+      game.current.vy = DG_JUMP_V;
+    }
+  }, [toggle]);
+
+  useEffect(() => { paint(); }, [paint]);
+
+  // Game loop
   useEffect(() => {
-    if (!on) return;
+    if (status !== 'running') return;
+    let raf;
+    let last = performance.now();
 
-    const timer = setInterval(
-      () => setScore(s => s + 1),
-      110
-    );
+    const tick = (now) => {
+      const dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+      const g = game.current;
 
-    return () => clearInterval(timer);
-  }, [on]);
+      if (g.y > 0 || g.vy > 0) {
+        g.vy -= DG_GRAVITY * dt;
+        g.y += g.vy * dt;
+        if (g.y <= 0) { g.y = 0; g.vy = 0; }
+      }
 
+      g.speed = Math.min(DG_MAX_SPEED, g.speed + 6 * dt);
+      g.obsX -= g.speed * dt;
+      g.distance += g.speed * dt;
+      if (g.obsX < -DG_OBS_W) g.obsX = DG_WIDTH + Math.random() * 250;
+
+      const hit =
+        g.obsX < DG_X + DG_W - 6 &&
+        g.obsX + DG_OBS_W > DG_X + 6 &&
+        g.y < DG_OBS_H - 6;
+
+      paint();
+
+      const s = Math.floor(g.distance / 10);
+      setScore((prev) => (prev === s ? prev : s));
+
+      if (hit) {
+        setBest((b) => Math.max(b, s));
+        changeStatus('over');
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [status, paint, changeStatus]);
+
+  // Keyboard: Space / ArrowUp
   useEffect(() => {
-    if (!jump) return;
+    const isTyping = (t) =>
+      t instanceof HTMLElement &&
+      (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
 
-    const timer = setTimeout(() => setJump(false), 520);
+    const onKeyDown = (e) => {
+      if (e.code !== 'Space' && e.code !== 'ArrowUp') return;
+      if (isTyping(e.target)) return;
+      e.preventDefault();
+      if (!e.repeat) jump();
+    };
+    const onKeyUp = (e) => {
+      if (e.code === 'Space' && !isTyping(e.target)) e.preventDefault();
+    };
 
-    return () => clearTimeout(timer);
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+    };
   }, [jump]);
 
   return (
-    <div className="dino">
-      <div className="score">
-        HI {String(score).padStart(5, '0')}
+    <div className="dg">
+      <style>{DG_CSS}</style>
+
+      <div className="dg-score">HI {dgPad(best)} &nbsp; {dgPad(score)}</div>
+
+      <div className="dg-stage" onPointerDown={jump}>
+        <div ref={dinoEl} className="dg-sprite dg-dino">▰</div>
+        <div ref={obsEl} className="dg-sprite dg-obs">♟</div>
+
+        {status === 'idle' && <div className="dg-overlay">PRESS SPACE OR TAP TO START</div>}
+        {status === 'paused' && <div className="dg-overlay">PAUSED</div>}
+        {status === 'over' && <div className="dg-overlay">GAME OVER — TAP TO RESTART</div>}
       </div>
 
-      <div className="ground">
-        <b className={jump ? 'jump' : ''}>▰</b>
-        <i>♟</i>
-      </div>
-
-      <div className="game-controls">
+      <div className="dg-controls" onMouseDown={(e) => e.preventDefault()}>
         <span>SPACE / TAP TO JUMP</span>
-
-        <button onClick={() => {
-          setOn(!on);
-          if (on) setScore(0);
-        }}>
-          {on ? 'PAUSE' : 'START'}
-        </button>
-
-        <button onClick={() => {
-          setOn(false);
-          setScore(0);
-        }}>
-          RESET
-        </button>
-
-        <button onClick={() => {
-          setOn(true);
-          setJump(true);
-        }}>
-          JUMP
-        </button>
+        <button onClick={toggle}>{status === 'running' ? 'PAUSE' : 'START'}</button>
+        <button onClick={reset}>RESET</button>
+        <button onClick={jump}>JUMP</button>
       </div>
     </div>
   );
 }
-
 /* ---------------- TIC TAC TOE ---------------- */
+
+const WINS = [
+  [0, 1, 2], [3, 4, 5], [6, 7, 8],
+  [0, 3, 6], [1, 4, 7], [2, 5, 8],
+  [0, 4, 8], [2, 4, 6]
+];
+
+// Returns 'X', 'O', 'DRAW', or '' (game still going)
+function getWinner(board) {
+  const line = WINS.find(([a, b, c]) =>
+    board[a] && board[a] === board[b] && board[b] === board[c]
+  );
+  if (line) return board[line[0]];
+  return board.every(Boolean) ? 'DRAW' : '';
+}
 
 function TicTacToe() {
   const [cells, setCells] = useState(Array(9).fill(''));
-  const [turn, setTurn] = useState('X');
+  const [turn, setTurn] = useState('X'); // you are X
   const [winner, setWinner] = useState('');
 
-  const wins = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8],
-    [0, 3, 6], [1, 4, 7], [2, 5, 8],
-    [0, 4, 8], [2, 4, 6]
-  ];
-
+  // Your move
   function play(i) {
-    if (cells[i] || winner) return;
+    if (turn !== 'X' || cells[i] || winner) return;
 
     const next = [...cells];
-    next[i] = turn;
+    next[i] = 'X';
     setCells(next);
 
-    const line = wins.find(([a, b, c]) =>
-      next[a] && next[a] === next[b] && next[b] === next[c]
-    );
-
-    if (line) {
-      setWinner(turn);
-    } else if (next.every(Boolean)) {
-      setWinner('DRAW');
-    } else {
-      setTurn(turn === 'X' ? 'O' : 'X');
-    }
+    const result = getWinner(next);
+    if (result) setWinner(result);
+    else setTurn('O');
   }
+
+  // Computer's move (O): picks a random empty square
+  useEffect(() => {
+    if (turn !== 'O' || winner) return;
+
+    const timer = setTimeout(() => {
+      const empty = cells
+        .map((v, i) => (v ? null : i))
+        .filter((i) => i !== null);
+      const pick = empty[Math.floor(Math.random() * empty.length)];
+
+      const next = [...cells];
+      next[pick] = 'O';
+      setCells(next);
+
+      const result = getWinner(next);
+      if (result) setWinner(result);
+      else setTurn('X');
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [turn, winner, cells]);
 
   function reset() {
     setCells(Array(9).fill(''));
@@ -551,13 +689,19 @@ function TicTacToe() {
     <div className="ttt">
       <p>
         {winner
-          ? winner === 'DRAW' ? "IT'S A DRAW" : `${winner} WINS`
-          : `${turn}'S TURN`}
+          ? winner === 'DRAW'
+            ? "IT'S A DRAW"
+            : winner === 'X'
+              ? 'YOU WIN'
+              : 'COMPUTER WINS'
+          : turn === 'X'
+            ? 'YOUR TURN (X)'
+            : 'COMPUTER IS THINKING...'}
       </p>
 
       <div>
         {cells.map((v, i) => (
-          <button key={i} onClick={() => play(i)}>
+          <button key={i} onClick={() => play(i)} disabled={!!v || !!winner || turn !== 'X'}>
             {v}
           </button>
         ))}
