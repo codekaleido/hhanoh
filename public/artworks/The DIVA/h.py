@@ -7,7 +7,7 @@ img = Image.open("back.jpg").convert("RGB")
 
 # YOUR CUSTOM DIMENSIONS
 width = 150
-height = 50
+height = 60
 
 img = img.resize((width, height), Image.Resampling.LANCZOS)
 
