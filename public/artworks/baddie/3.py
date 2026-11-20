@@ -6,7 +6,7 @@ from html import escape
 img = Image.open("image (1).jpg").convert("RGB")
 
 # YOUR CUSTOM DIMENSIONS
-width = 75
+width = 150
 height = 50
 
 img = img.resize((width, height), Image.Resampling.LANCZOS)
