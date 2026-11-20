@@ -313,12 +313,12 @@ function Output({ item }) {
               scrolling="yes"
               style={{
                 width: '100%',
-                height: `${viewerHeight}px`,
+                height: 'min(65vh, 520px)',
+                minHeight: '300px',
                 border: 'none',
                 display: 'block',
-                background: '#111',
-                flexShrink: 0
-              }}
+                background: '#111'
+                }}
             />
           ) : (
             <img src={item.image} alt={item.title} />

@@ -15,3 +15,351 @@
 @media(max-width:700px){.hero{min-height:90svh;align-items:flex-end;padding-bottom:100px}.hero-copy{max-width:100%;margin-bottom:3vh}.hero h1{font-size:clamp(76px,19vw,130px)}.shape-wrap{width:78vw;height:53vh;right:-5vw;top:34%}.hero-copy{z-index:4}.topline,.hero-bottom{font-size:8px}.gallery{height:auto;min-height:0;padding-top:70px}.gallery-head{padding-bottom:20px}.rail-window{overflow-x:auto;overflow-y:hidden;padding:10px 22px 28px;scrollbar-width:none}.rail-window::-webkit-scrollbar{display:none}.rail{transform:none!important}.card{width:74vw;height:95vw;max-height:420px}.gallery-hint span:nth-child(2){display:none}.out-head,.games-head{display:block}.out-head p,.games-head p{margin-top:16px}.terminal-top{align-items:flex-start;flex-direction:column}.terminal-top>div{flex-wrap:wrap}.ascii-stage{min-height:260px;padding:12px}.game-grid{grid-template-columns:1fr}.gamebox{min-height:350px}.foot-main{align-items:flex-start;flex-direction:column;padding:55px 0}.foot-bottom{flex-wrap:wrap}.foot-bottom span:last-child{display:none}}
 
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* =====================================
+   MOBILE RESPONSIVE IMPROVEMENTS
+===================================== */
+
+@media (max-width: 700px) {
+
+  /* GENERAL */
+  body {
+    overflow-x: hidden;
+  }
+
+  .kicker {
+    font-size: 8px;
+    line-height: 1.8;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 680px;
+    height: 100svh;
+    padding: 30px 6vw 90px;
+    align-items: flex-end;
+  }
+
+  .topline,
+  .hero-bottom {
+    left: 6vw;
+    right: 6vw;
+    font-size: 7px;
+    gap: 15px;
+  }
+
+  .hero-copy {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .hero-copy p {
+    font-size: 8px;
+    line-height: 1.8;
+    max-width: 260px;
+  }
+
+  .hero h1 {
+    font-size: clamp(65px, 17vw, 115px);
+    line-height: 0.9;
+    overflow-wrap: anywhere;
+  }
+
+  .shape-wrap {
+    width: 78vw;
+    height: 48vh;
+    max-height: 430px;
+    right: -5vw;
+    top: 32%;
+  }
+
+  /* GALLERY */
+  .gallery {
+    height: auto;
+    min-height: 0;
+    padding: 65px 0 35px;
+    overflow: hidden;
+  }
+
+  .gallery-head {
+    padding: 0 6vw 25px;
+  }
+
+  .gallery-head h2,
+  .games-head h2 {
+    font-size: clamp(48px, 12vw, 76px);
+    line-height: 1;
+    overflow-wrap: anywhere;
+  }
+
+  .gallery-head p,
+  .games-head p {
+    font-size: 10px;
+    line-height: 1.8;
+  }
+
+  /* Swipeable artwork collection */
+  .rail-window {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 15px 6vw 35px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    touch-action: pan-x pan-y;
+  }
+
+  .rail {
+    width: max-content;
+    transform: none !important;
+    gap: 18px;
+  }
+
+  .card {
+    width: 76vw;
+    max-width: 310px;
+    height: 95vw;
+    max-height: 400px;
+    flex-shrink: 0;
+  }
+
+  .card-meta {
+    padding: 12px 16px;
+    gap: 7px;
+  }
+
+  .card-meta strong {
+    font-size: 27px;
+    overflow-wrap: anywhere;
+  }
+
+  .gallery-hint {
+    padding: 0 6vw;
+    font-size: 7px;
+    line-height: 1.8;
+    gap: 10px;
+  }
+
+  .gallery-hint span {
+    max-width: 45%;
+  }
+
+  /* ASCII OUTPUT */
+  .output {
+    padding: 65px 5vw;
+    overflow: hidden;
+  }
+
+  .out-head {
+    display: block;
+    margin: 28px 0 22px;
+  }
+
+  .out-head h2 {
+    font-size: clamp(48px, 12vw, 75px);
+    line-height: 1;
+    overflow-wrap: anywhere;
+  }
+
+  .out-head p {
+    font-size: 10px;
+    line-height: 1.8;
+    margin-top: 15px;
+  }
+
+  .terminal {
+    width: 100%;
+    min-width: 0;
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .terminal-top {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 13px;
+    font-size: 8px;
+    line-height: 1.8;
+  }
+
+  .terminal-top > span {
+    overflow-wrap: anywhere;
+  }
+
+  .terminal-top > div {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .terminal button {
+    font-size: 7px;
+    padding: 9px 10px;
+  }
+
+  .ascii-stage {
+    width: 100%;
+    min-width: 0;
+    min-height: 250px;
+    max-height: 65vh;
+    padding: 8px;
+    margin: 13px 0;
+    overflow: auto;
+    display: block;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ascii-stage iframe {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 60vh !important;
+    min-height: 280px;
+    border: 0;
+  }
+
+  .ascii-stage img {
+    display: block;
+    max-width: 100%;
+    max-height: 55vh;
+    width: auto;
+    height: auto;
+    margin: auto;
+    object-fit: contain;
+  }
+
+  .terminal-bottom {
+    flex-wrap: wrap;
+    font-size: 7px;
+    line-height: 1.8;
+  }
+
+  /* GAMES: STACK VERTICALLY */
+  .games {
+    padding: 65px 6vw;
+  }
+
+  .games-head {
+    display: block;
+    margin: 28px 0;
+  }
+
+  .games-head p {
+    margin-top: 12px;
+  }
+
+  .game-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .gamebox {
+    width: 100%;
+    min-width: 0;
+    min-height: 340px;
+    padding: 20px;
+    border-radius: 22px;
+  }
+
+  .gamebox h3 {
+    font-size: 32px;
+    line-height: 1.2;
+  }
+
+  .dg {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .dg-stage {
+    width: 100%;
+  }
+
+  .dg-controls {
+    font-size: 9px;
+    gap: 7px;
+  }
+
+  .ttt > div {
+    grid-template-columns: repeat(3, 58px);
+    gap: 6px;
+  }
+
+  .ttt > div button {
+    width: 58px;
+    height: 58px;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 25px 6vw 20px;
+  }
+
+  .foot-top {
+    font-size: 7px;
+    line-height: 1.8;
+  }
+
+  .foot-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 35px;
+    padding: 55px 0;
+  }
+
+  .foot-main h2 {
+    font-size: clamp(48px, 12vw, 75px);
+    line-height: 0.95;
+  }
+
+  .foot-bottom {
+    flex-wrap: wrap;
+    font-size: 7px;
+    line-height: 1.8;
+    gap: 12px;
+  }
+}
+
+/* EXTRA SMALL PHONES */
+@media (max-width: 380px) {
+
+  .hero h1 {
+    font-size: 17vw;
+  }
+
+  .gallery-head h2,
+  .games-head h2,
+  .out-head h2 {
+    font-size: 45px;
+  }
+
+  .card {
+    width: 82vw;
+  }
+
+  .terminal {
+    padding: 9px;
+  }
+
+  .terminal-top > div {
+    gap: 5px;
+  }
+
+  .terminal button {
+    padding: 8px;
+    font-size: 6px;
+  }
+}
+
+/* DESKTOP: KEEP GAMES SIDE BY SIDE */
+@media (min-width: 701px) {
+  .game-grid {
+    grid-template-columns: 1.1fr .9fr;
+  }
+}
